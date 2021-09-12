@@ -5,7 +5,7 @@
 #include <string.h>
 #include <time.h>
 
-asdas
+
 int isProcessDir (const struct dirent *namelist) {
     if (isdigit(namelist->d_name[0]) == 0)
         return 0;
