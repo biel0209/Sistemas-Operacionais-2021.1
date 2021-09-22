@@ -12,20 +12,16 @@ void buscar(char c)
       x = fgetc(arq);
       if (x == c)
         cont++;
-      printf("%c" , c);        
+      //printf("%c" , c);        
     }while (x != EOF);
-    printf("\nOcorrencias de '%c' no arquivo: %d\n" , c, cont);        
+    printf("Ocorrencias de '%c' no arquivo: %d\n" , c, cont);        
 }
 
 int main()
 {
-    FILE *arq;
-    int cont;
-    char alfabeto[26] = "abcdefghijklmnopqrstuvwxyz";
-    int i=0;
-    while(i<26){
-      buscar(alfabeto[i]);
-      i++;
-    }
+    char c;
+    printf("Digite um caracter a ser pesquisado no arquivo: ");        
+    scanf("%c",&c);
+    buscar(c);
     return 0;
 }

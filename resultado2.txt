@@ -1,0 +1,7 @@
+Tempo total: 0.02
+Porcentagem de uso da CPU: 7%
+Tempo em modo kernel: 0.00
+Tempo em modo usuario: 0.00
+Trocas de contexto involuntarias: 1
+Trocas de contexto voluntarias: 18
+

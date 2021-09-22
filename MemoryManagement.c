@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define TAM 5
-#define TAM_2 10
+#define TAM 1000
+#define TAM_2 10000
 
 void imprimirVetor(int *v, int tam)
 {
