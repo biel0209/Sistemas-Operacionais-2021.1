@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/*Este programa realiza um calculo, armazena o resultado novetor vet e o imprime. Esse processo ocorre 10.000 vezes.*/
 int main()
 {       
     int i=0;
