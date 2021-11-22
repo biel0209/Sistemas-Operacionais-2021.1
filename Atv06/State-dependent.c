@@ -3,7 +3,8 @@
 #include <time.h>
 #include <math.h>
 #define QTD_PROCESS 10
-#define QUANTUM 2.4
+#define QUANTUM_MIN 0.1
+
 
 //Estrutura processo que terá os atributos de um processo
 typedef struct processo { 
@@ -16,6 +17,7 @@ typedef struct processo {
 }Processo; 
 
 Processo *filaP = NULL; //estrutura dos processos (filaP)
+float quantum = 2.4;
 
 //Função para gerar numero aleatorio
 int gerarNumAleatorio(int valor_max){
@@ -25,7 +27,7 @@ int gerarNumAleatorio(int valor_max){
 	return num;
 }
 
-void inserirNafilaP(Processo **filaPP, int id)
+void inserirNafilaP(Processo **filaP, int id)
 {
     Processo *aux, *novo = malloc(sizeof(Processo));
     if (novo){
@@ -35,10 +37,10 @@ void inserirNafilaP(Processo **filaPP, int id)
         novo->concluido = 0;
         novo->prioridade = gerarNumAleatorio(5);
         novo->prox = NULL;
-        if (*filaPP == NULL){
-            *filaPP = novo;
+        if (*filaP == NULL){
+            *filaP = novo;
         }else{
-            aux = *filaPP;
+            aux = *filaP;
             while(aux->prox){
                 aux = aux->prox;
             }
@@ -118,6 +120,11 @@ int verificarProcessos(Processo *filaP){
     return 0;
 }
 
+//Verificar quantos processos estão já 
+int qtdProcessosProntos(){
+
+}
+
 void main() 
 { 
     //chamada de srand para evitar que cada execução gere os mesmos numeros
@@ -143,11 +150,11 @@ void main()
     while(verificarProcessos(tail)){
         if(filaP->concluido != 1){
             printf("%d - ",filaP->id);
-            if (filaP->bt - QUANTUM <= 0){ //verificar se o processo foi concluido
+            if (filaP->bt - quantum <= 0){ //verificar se o processo foi concluido
                 filaP->concluido = 1;
                 tail->concluido = 1;
             }else{
-                filaP->bt -= QUANTUM;
+                filaP->bt -= quantum;
             }
             if(i == QTD_PROCESS){
                 filaP = tail;
