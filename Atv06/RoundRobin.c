@@ -2,14 +2,15 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#define QTD_PROCESS 10
+#define QTD_PROCESS 5
 #define QUANTUM 2.4
 
 //Estrutura processo que terá os atributos de um processo
 typedef struct processo { 
 	int id;    //nome do processo
-	int at, rt, wt, tt;  //arrival time, response time, waiting time e turn around time
+	float at, rt, wt, tt;  //arrival time, response time, waiting time e turn around time
 	float bt;   //burst time
+    float salvarEstado; //armazena o quanto do burst time ainda falta para o processo finalizar
     int concluido; //assume 1 para processo concluido ou 0 para processo inconcluido
 	int prioridade; //prioridade do processo (1: baixa; 2:média; 3:alta; 4:muito alta)
     struct processo *prox;
@@ -95,8 +96,8 @@ void imprimirFila(Processo *filaP)
         printf("\n----------Processos---------\n");
         printf("\nID\tTurnAround\tBurst Time\tArrival time\tResponse Time\tWaiting Time\n"); 
         while(filaP){
-            printf("%d\t%d\t\t%f\t\t%d\t\t", filaP->id, filaP->tt, filaP->bt, filaP->at); 
-            printf("%d\t\t%d\n", filaP->rt, filaP->wt); 
+            printf("%d\t%.2f\t\t%.2f\t\t%.2f\t\t", filaP->id, filaP->tt, filaP->bt, filaP->at); 
+            printf("%.2f\t\t%.2f\n", filaP->rt, filaP->wt); 
             filaP = filaP->prox;
         }
     }
@@ -131,24 +132,46 @@ void main()
     //Ordenando a fila
     ordenarFila(filaP);
 
-    imprimirFila(filaP);
-
-
     Processo *tail = filaP; //referencia do primeiro processo para garantir uma fila circular
+
+    imprimirFila(filaP);
 
     printf("Ordem de execucao:\n");
     int i=1;
     int j=1;
-
+    float somaWt=0, somaTt=0, somaBt=0;
+    float t = filaP->at;
     while(verificarProcessos(tail)){
         if(filaP->concluido != 1){
             printf("%d - ",filaP->id);
-            if (filaP->bt - QUANTUM <= 0){ //verificar se o processo foi concluido
+            if (filaP->salvarEstado - QUANTUM <= 0){ //verificar se o processo foi concluido
                 filaP->concluido = 1;
                 tail->concluido = 1;
             }else{
-                filaP->bt -= QUANTUM;
+                filaP->salvarEstado -= QUANTUM;
             }
+            
+            //atualizando o tempo decorrido
+            t += QUANTUM;   
+
+            //calculando o tempo de espera (wt) 
+            filaP->wt = fabs(t - filaP->at - filaP->bt);
+
+            //calculando o tempo de resposta (rt) 
+            filaP->rt = fabs(t - filaP->at - filaP->bt);
+
+            //somatório do tempo de espera
+            somaWt += filaP->wt; 
+
+            //calculando Turn Around Time (tt) 
+            filaP->tt = fabs(t - filaP->at); 
+
+            //calculando o somatório de todos os turn around time
+            somaTt += filaP->tt; 
+            
+            //calculando o somatório de todos burst times
+            somaBt += filaP->bt; 
+
             if(i == QTD_PROCESS){
                 filaP = tail;
                 i=0;
@@ -163,8 +186,10 @@ void main()
     }
     printf("\n");
 
-    //imprimirFila(filaP);
+    filaP=tail;
+    imprimirFila(filaP);	
 
-    
-	
+    printf("\nAvg. Waiting Time: %.2f\n", somaWt / QTD_PROCESS); 
+	printf("Avg. Turn Around Time: %.2f\n", somaTt / QTD_PROCESS); 
+	printf("Avg. Processor utilization: %.2f\n", somaBt / QTD_PROCESS);
 } 
