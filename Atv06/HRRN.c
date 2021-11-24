@@ -1,72 +1,188 @@
 #include <stdio.h> 
 #include <stdlib.h>
 #include <time.h>
-#define QTD_PROCESS 5
+#include <string.h>
+#define CENARIO "cenario1.txt"
 
 //Estrutura processo que terá os atributos de um processo
-typedef struct processo { 
+typedef struct processo{ 
 	int id;    //nome do processo
-	int at, bt, ct, wt, tt;  //arrival time, burst time, completion time, waiting time e turn around time
+	int at, bt, rt, wt, tt;  //arrival time, burst time, response time, waiting time e turn around time
 	int concluido; //assume 1 para processo concluido ou 0 para processo inconcluido
 	float ntt; //normalized turn around time
+	int blTime; //tempo de bloqueio
 	int prioridade; //prioridade do processo (varia entre 1 e 5)
+	struct processo *prox;
 }Processo; 
 
-//Função para ordenar a lista de processos baseado em seus arrival time 
-void ordenar(Processo *vet) 
-{ 
-	Processo aux; 
-	for (int i = 0; i < QTD_PROCESS - 1; i++) { 
-		for (int j = i + 1; j < QTD_PROCESS; j++) { 
-			if (vet[i].at > vet[j].at) { 
-				aux = vet[i]; 
-				vet[i] = vet[j]; 
-				vet[j] = aux; 
-			} 
-		} 
-	} 
-} 
+int somaWt = 0, somaTt = 0, somaBt = 0; 
 
-//Função para gerar numero aleatorio tanto para arrival time quanto para burst time
-int gerarNumAleatorio(){
-	int num = rand() % 10;
-	while(num == 0)   //tratamento para evitar o caso de gerar um numero igual a zero
-		num = rand() % 10;
-	return num;
+//Função para atribuir -1 em todas as posições de um vetor
+void resetarVetor(int *vet, int tam){
+	for (int j=0; j < tam; j++){
+		vet[j] = -1;
+	}
 }
+
+void inserirNafilaP(Processo **fila, int id, int arriv, int prio, int burst, int bloq)
+{
+    Processo *aux, *novo = malloc(sizeof(Processo));
+    if (novo){
+        novo->id = id;
+        novo->at = arriv;
+        novo->bt = burst;
+		somaBt += novo->bt;
+        novo->concluido = 0;
+        novo->prioridade = prio;
+		novo->blTime = bloq;
+        novo->prox = NULL;
+        if (*fila == NULL){
+            *fila = novo;
+        }else{
+            aux = *fila;
+            while(aux->prox){
+                aux = aux->prox;
+            }
+            aux->prox = novo;
+        }
+    }else{
+        printf("Memoria indisponivel\n");
+    }
+}
+
+void ordenarFila(Processo *fila)       //metodo bubblesort
+{
+    Processo *pi; //referencia do primeiro da fila
+    Processo *pj; //referencia do nó que varrerá a fila
+    Processo *pfim = NULL; //referencia do ultimo da fila
+
+    for(pi=fila; pi->prox != NULL; pi = pi->prox){
+        for(pj=fila; pj->prox != pfim; pj = pj->prox){
+            if ( pj->at > pj->prox->at ){
+                int auxId = pj->id;
+                int auxAt = pj->at;
+                int auxBt = pj->bt;
+                int auxPrioridade = pj->prioridade;
+
+                pj->id = pj->prox->id;
+                pj->at = pj->prox->at;
+                pj->bt = pj->prox->bt;
+                pj->prioridade = pj->prox->prioridade;
+
+                pj->prox->id = auxId;
+                pj->prox->at = auxAt;
+                pj->prox->bt = auxBt;
+                pj->prox->prioridade = auxPrioridade;
+            }
+        }
+        pfim = pj;
+    }
+}
+
+
+Processo* removerDaFila(Processo **fila)
+{
+    Processo *remover = NULL;
+    remover = *fila;
+    *fila = remover->prox;
+    return remover;
+}
+
+void imprimirFila(Processo *fila)
+{
+    if (fila == NULL){
+        printf("A fila esta vazia\n");
+    }else{
+        printf("\n----------Processos---------\n");
+        printf("\nID\tTurnAround\tBurst Time\tArrival time\tResponse Time\tWaiting Time\tPrioridade\tTime Blocked\n"); 
+        while(fila){
+            printf("%d\t%d\t\t%d\t\t%d\t\t", fila->id, fila->tt, fila->bt, fila->at); 
+            printf("%d\t\t%d\t\t%d\t\t%d\n", fila->rt, fila->wt, fila->prioridade, fila->blTime); 
+            fila = fila->prox;
+        }
+    }
+}
+
+int* extrairDoArquivo(Processo **filaP, char *linha_arq) 
+{ 
+	
+	int num[6];
+	resetarVetor(num, sizeof(num)/sizeof(num[0]));
+	char c;
+	int id, arriv, prio, burst, bloq;
+
+	int qtd_virgula=0;   //verificar em qual virgula o char 'c' se encontra
+	int j=0;
+	for(int i=0; i < (int)strlen(linha_arq); i++){
+		c = linha_arq[i];
+
+		if(c == ',' || c == '\n'){
+			int numero=0;
+			for (j=0; j < sizeof(num)/sizeof(num[0]); j++){
+				if(num[j] >= 0)
+					numero = numero * 10 + num[j];
+			}
+
+			if(c == '\n'){
+				bloq = numero;
+			}else{
+				qtd_virgula++;
+				if(qtd_virgula == 1) id = numero;
+				else if(qtd_virgula == 2) arriv = numero;
+				else if(qtd_virgula == 3) prio = numero;
+				else if(qtd_virgula == 4) burst = numero;
+			}
+			resetarVetor(num, sizeof(num)/sizeof(num[0]));
+			j=0;
+
+		}else{
+			num[j] = c - '0';
+			j++;
+		}
+	}
+	inserirNafilaP(filaP, id, arriv, prio, burst, bloq);
+} 
 
 void main() 
 { 
 	int i, j, t; 
-	float somaWt = 0, somaTt = 0, somaBt = 0; 
-	Processo filaP[QTD_PROCESS]; //vetor para armazenar a fila de processos
+	Processo *filaP = NULL; //fila de processos prontos
+	Processo *bloqueados = NULL; //fila de processos bloqueados
+	FILE *cenario = fopen("./cenarios-entrada/" CENARIO, "r");
 
-	//chamada de srand para evitar que cada execução gere os mesmos numeros
-	srand(time(NULL));
+	int qtd_process=0;
+	char linha_arq[25];
+	//Enquanto existir linhas no arquivo o loop é executado
+	while(fgets(linha_arq, 25, cenario) != NULL){
+		extrairDoArquivo(&filaP, linha_arq);
+		qtd_process++;
+	}
 
-	//inicializando cada posição do vetor
-	for (i = 0; i < QTD_PROCESS; i++) { 
-		filaP[i].id = i+1; 
-		filaP[i].at = gerarNumAleatorio(); 
-		filaP[i].bt = gerarNumAleatorio(); 
-		filaP[i].concluido = 0; 
-		somaBt += filaP[i].bt; 
-	} 
+	fclose(cenario);
 
-	ordenar(filaP); //ordenar processos baseado em seus arrival time
+	ordenarFila(filaP); //ordenar processos baseado em seus arrival time
+
+	//imprimirFila(filaP);
 	
-	for (t = filaP[0].at; t <= somaBt;) { 
+	Processo *tail = filaP;  //referencia do primeiro nó da fila
+
+	cenario = fopen("./cenarios-saida/" CENARIO, "w");
+	
+	fprintf(cenario, "\n----------Ordem de execucao---------\n");
+    fprintf(cenario, "\nID\tTurnAround\tBurst Time\tArrival time\tResponse Time\tWaiting Time\tPrioridade\n"); 
+	for (t = filaP->at; t <= somaBt;) { 
 		
 		float taxa_min = -9999;  //Limite mínimo da taxa de resposta
 		float taxa_resposta; 
 
-		int proxP;  //armazena qual o próximo processo a ser chamado
-		for (i = 0; i < QTD_PROCESS; i++) { 
+		Processo *aux;  //realizar iteração
+		Processo *proxP;  //armazena qual o próximo processo a ser chamado
+		for (aux = filaP; aux; aux = aux->prox) { 
 			// Check if the process has arrived and is Inconcluido 
-			if (filaP[i].at <= t && filaP[i].concluido != 1) { 
+			if (aux->at <= t && aux->concluido != 1) { 
 
 				// Calculating the Response Ratio 
-				taxa_resposta = (filaP[i].bt + (t - filaP[i].at)) / filaP[i].bt; 
+				taxa_resposta = (aux->bt + (t - aux->at)) / aux->bt; 
 
 				// Checking for the Highest Response Ratio 
 				if (taxa_min < taxa_resposta) { 
@@ -75,33 +191,48 @@ void main()
 					taxa_min = taxa_resposta; 
 
 					// Storing the  proxPation 
-					proxP = i; 
+					filaP = aux; 
 				} 
 			} 
+			
 		} 
 
+		
+
 		//atualizando o tempo decorrido
-		t += filaP[proxP].bt;   
+		t += filaP->bt;   
 
 		//calculando o tempo de espera (wt) 
-		filaP[proxP].wt = t - filaP[proxP].at - filaP[proxP].bt; 
+		filaP->wt = t - filaP->at - filaP->bt; 
+
+		//calculando o tempo de resposta (rt) 
+		filaP->rt = t - filaP->at - filaP->bt; 
 
 		//somatório do tempo de espera
-		somaWt += filaP[proxP].wt; 
+		somaWt += filaP->wt; 
 
 		//calculando Turn Around Time (tt) 
-		filaP[proxP].tt = t - filaP[proxP].at; 
+		filaP->tt = t - filaP->at; 
 
 		//calculando o somatório de todos os turn around time
-		somaTt += filaP[proxP].tt; 
+		somaTt += filaP->tt; 
 
 		//calculando Normalized Turn Around Time 
-		filaP[proxP].ntt = ((float)filaP[proxP].tt / filaP[proxP].bt); 
+		filaP->ntt = ((float)filaP->tt / filaP->bt); 
 
 		//atualizando o status de concluido para 1 (processo concluido) 
-		filaP[proxP].concluido = 1;  
+		filaP->concluido = 1;  
+
+		fprintf(cenario, "%d\t%d\t\t%d\t\t%d\t\t", filaP->id, filaP->tt, filaP->bt, filaP->at); 
+        fprintf(cenario, "%d\t\t%d\t\t%d\n", filaP->rt, filaP->wt, filaP->prioridade); 
+
+		filaP = tail;
+
+		
 	} 
-	printf("\nAvg. Waiting Time: %f\n", somaWt / QTD_PROCESS); 
-	printf("Avg. Turn Around Time: %f\n", somaTt / QTD_PROCESS); 
-	printf("Avg. Processor utilization: %f\n", somaBt / QTD_PROCESS); 
+
+	fprintf(cenario, "\nAvg. Waiting Time: %d\n", somaWt / qtd_process); 
+	fprintf(cenario, "Avg. Turn Around Time: %d\n", somaTt / qtd_process); 
+	fprintf(cenario, "Avg. Service time: %d\n", somaBt / qtd_process); 
+	
 } 
