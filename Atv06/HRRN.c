@@ -9,7 +9,7 @@ typedef struct processo{
 	int id;    //nome do processo
 	int at, bt, rt, wt, tt;  //arrival time, burst time, response time, waiting time e turn around time
 	int concluido; //assume 1 para processo concluido ou 0 para processo inconcluido
-	float ntt; //normalized turn around time
+	float bloq; //normalized turn around time
 	int blTime; //tempo de bloqueio
 	int prioridade; //prioridade do processo (varia entre 1 e 5)
 	struct processo *prox;
@@ -153,7 +153,8 @@ void main()
 	int qtd_process=0;
 	char linha_arq[25];
 	//Enquanto existir linhas no arquivo o loop é executado
-	while(fgets(linha_arq, 25, cenario) != NULL){
+	
+	while(fgets(linha_arq, 25, cenario) != NULL && qtd_process < 5){
 		extrairDoArquivo(&filaP, linha_arq);
 		qtd_process++;
 	}
@@ -162,14 +163,19 @@ void main()
 
 	ordenarFila(filaP); //ordenar processos baseado em seus arrival time
 
-	//imprimirFila(filaP);
+	imprimirFila(filaP);
 	
 	Processo *tail = filaP;  //referencia do primeiro nó da fila
 
 	cenario = fopen("./cenarios-saida/" CENARIO, "w");
 	
-	fprintf(cenario, "\n----------Ordem de execucao---------\n");
-    fprintf(cenario, "\nID\tTurnAround\tBurst Time\tArrival time\tResponse Time\tWaiting Time\tPrioridade\n"); 
+	// fprintf(cenario, "\n----------Ordem de execucao---------\n");
+    // fprintf(cenario, "\nID\tTurnAround\tBurst Time\tArrival time\tResponse Time\tWaiting Time\tPrioridade\n");
+
+	printf("\n----------Ordem de execucao---------\n");
+    printf("\nID\tTurnAround\tBurst Time\tArrival time\tResponse Time\tWaiting Time\tPrioridade\n");
+
+
 	for (t = filaP->at; t <= somaBt;) { 
 		
 		float taxa_min = -9999;  //Limite mínimo da taxa de resposta
@@ -217,22 +223,26 @@ void main()
 		//calculando o somatório de todos os turn around time
 		somaTt += filaP->tt; 
 
-		//calculando Normalized Turn Around Time 
-		filaP->ntt = ((float)filaP->tt / filaP->bt); 
-
 		//atualizando o status de concluido para 1 (processo concluido) 
 		filaP->concluido = 1;  
 
-		fprintf(cenario, "%d\t%d\t\t%d\t\t%d\t\t", filaP->id, filaP->tt, filaP->bt, filaP->at); 
-        fprintf(cenario, "%d\t\t%d\t\t%d\n", filaP->rt, filaP->wt, filaP->prioridade); 
+		// fprintf(cenario, "%d\t%d\t\t%d\t\t%d\t\t", filaP->id, filaP->tt, filaP->bt, filaP->at); 
+        // fprintf(cenario, "%d\t\t%d\t\t%d\n", filaP->rt, filaP->wt, filaP->prioridade); 
+
+		printf("%d\t%d\t\t%d\t\t%d\t\t", filaP->id, filaP->tt, filaP->bt, filaP->at); 
+        printf("%d\t\t%d\t\t%d\n", filaP->rt, filaP->wt, filaP->prioridade); 
 
 		filaP = tail;
 
 		
 	} 
-
+	/*
 	fprintf(cenario, "\nAvg. Waiting Time: %d\n", somaWt / qtd_process); 
 	fprintf(cenario, "Avg. Turn Around Time: %d\n", somaTt / qtd_process); 
 	fprintf(cenario, "Avg. Service time: %d\n", somaBt / qtd_process); 
+	*/
+	printf("\nAvg. Waiting Time: %d\n", somaWt / qtd_process); 
+	printf("Avg. Turn Around Time: %d\n", somaTt / qtd_process); 
+	printf("Avg. Service time: %d\n", somaBt / qtd_process); 
 	
 } 
