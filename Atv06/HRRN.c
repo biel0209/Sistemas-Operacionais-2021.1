@@ -135,7 +135,7 @@ void extrairDoArquivo(Processo **filaP, char *linha_arq)
 	inserirNafilaP(filaP, id, arriv, prio, burst, bloq);
 } 
 
-void main() 
+int main() 
 { 
 	clock_t time_Execution = clock();
 	int i, j;
@@ -223,4 +223,6 @@ void main()
 	fprintf(cenario, "Avg. Turn Around Time: %.2f\n", somaTt / qtd_process); 
 	fprintf(cenario, "Avg. Service time: %.2f\n", somaBt / qtd_process);
     fprintf(cenario, "Tempo de execucao do programa: %.2f\n", (double)time_Execution);
+
+	return 0;
 } 

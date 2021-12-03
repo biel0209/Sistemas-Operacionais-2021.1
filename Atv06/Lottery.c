@@ -16,15 +16,15 @@ typedef struct processo {
 }Processo; 
 
 Processo filaP[QTD_PROCESS]; //vetor para armazenar a fila de processos
+float somaWt = 0, somaTt = 0, somaBt = 0; 
 int tickets_distribuidos = 0;   //quantidade de tickets distribuídos
 int *tickets_sorteados; //vetor que armazena todos os tickets já sorteados
 
-//Função para gerar numero aleatorio
-int gerarNumAleatorio(int valor_max){
-	int num = rand() % valor_max;
-    while(num == 0)   //tratamento para evitar o caso de gerar um numero igual a zero
-        num = rand() % valor_max;
-	return num;
+//Função para atribuir -1 em todas as posições de um vetor
+void resetarVetor(int *vet, int tam){
+	for (int j=0; j < tam; j++){
+		vet[j] = -1;
+	}
 }
 
 //Função para ordenar um vetor
@@ -109,7 +109,7 @@ void main()
 { 
 	srand(time(NULL)); 
     int t;
-	float somaWt = 0, somaTt = 0, somaBt = 0; 
+
     
     //inicializando cada posição do vetor
 	for (int i = 0; i < QTD_PROCESS; i++){ 
