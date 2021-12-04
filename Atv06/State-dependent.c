@@ -3,8 +3,8 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#define CENARIO "cenario1.txt" //alternar entre "cenario1", "cenario2", "cenario3", "cenario4" e "cenario5" para simular cada um
-#define QUANTUM_MIN 0.2
+#define CENARIO "cenario5.txt" //alternar entre "cenario1", "cenario2", "cenario3", "cenario4" e "cenario5" para simular cada um
+#define QUANTUM_MIN 1
 
 //Estrutura processo que terá os atributos de um processo
 typedef struct processo { 
@@ -315,6 +315,7 @@ int main()
     fprintf(cenario, "\nAvg. Waiting Time: %.2f\n", somaWt / qtd_process); 
 	fprintf(cenario, "Avg. Turn Around Time: %.2f\n", somaTt / qtd_process); 
 	fprintf(cenario, "Avg. Service time: %.2f\n", somaBt / qtd_process);
+    fprintf(cenario, "Throughput: %.2f\n", t/qtd_process);
     fprintf(cenario, "Tempo de execucao do programa: %.2f\n", (double)time_Execution);
 
     return 0;

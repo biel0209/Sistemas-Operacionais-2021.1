@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#define CENARIO "cenario1.txt" //alternar entre "cenario1", "cenario2", "cenario3", "cenario4" e "cenario5" para simular cada um
+#define CENARIO "cenario5.txt" //alternar entre "cenario1", "cenario2", "cenario3", "cenario4" e "cenario5" para simular cada um
 #define QUANTUM 2.4
 
 //Estrutura processo que terá os atributos de um processo
@@ -13,7 +13,7 @@ typedef struct processo {
 	float bt;   //burst time
     float salvarEstado; //armazena o quanto do burst time ainda falta para o processo finalizar
     int concluido; //assume 1 para processo concluido ou 0 para processo inconcluido
-	int prioridade; //prioridade do processo (1: baixa; 2:média; 3:alta; 4:muito alta)
+	int prioridade; //prioridade do processo 
     struct processo *prox;
 }Processo; 
 
@@ -235,6 +235,7 @@ int main()
     fprintf(cenario, "\nAvg. Waiting Time: %.2f\n", somaWt / qtd_process); 
 	fprintf(cenario, "Avg. Turn Around Time: %.2f\n", somaTt / qtd_process); 
 	fprintf(cenario, "Avg. Service time: %.2f\n", somaBt / qtd_process);
+    fprintf(cenario, "Throughput: %.2f\n", t/qtd_process);
     fprintf(cenario, "Tempo de execucao do programa: %.2f\n", (double)time_Execution);
 
     return 0;

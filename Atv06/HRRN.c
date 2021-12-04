@@ -11,7 +11,7 @@ typedef struct processo{
 	int concluido; //assume 1 para processo concluido ou 0 para processo inconcluido
 	float bloq; //normalized turn around time
 	int blTime; //tempo de bloqueio
-	int prioridade; //prioridade do processo (varia entre 1 e 5)
+	int prioridade; //prioridade do processo
 	int executado; //assume 1 para processo que já teve uma primeira execucao ou 0 caso ainda nn tenha sido executado nenhuma vez
 	struct processo *prox;
 }Processo; 

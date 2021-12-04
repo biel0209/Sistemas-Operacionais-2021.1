@@ -3,14 +3,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#define CENARIO "cenario1.txt" //alternar entre "cenario1", "cenario2", "cenario3", "cenario4" e "cenario5" para simular cada um
+#define CENARIO "cenario5.txt" //alternar entre "cenario1", "cenario2", "cenario3", "cenario4" e "cenario5" para simular cada um
 
 //Estrutura processo que terá os atributos de um processo
 typedef struct processo { 
 	int id;    //nome do processo
 	int at, bt, rt, wt, tt;  //arrival time, burst time, response time, waiting time e turn around time
     int concluido; //assume 1 para processo concluido ou 0 para processo inconcluido
-	int prioridade; //prioridade do processo (4: baixa; 3:média; 2:alta; 1:muito alta)
+	int prioridade; //prioridade do processo 
     struct processo *prox;
 }Processo; 
 
@@ -157,7 +157,7 @@ int main()
 
 	int qtd_process=0;
 	char linha_arq[25];
-    
+
 	//Enquanto existir linhas no arquivo o loop é executado
 	while(fgets(linha_arq, 25, cenario) != NULL){
 		extrairDoArquivo(&filaP, linha_arq);
@@ -175,6 +175,7 @@ int main()
     
     float t = filaP->at;
     while(verificarProcessos(filaP)){
+        //Se o processo ainda não foi concluído
         if(filaP->concluido != 1){ 
             //atualizando o tempo decorrido
             t += filaP->bt;   
@@ -211,6 +212,7 @@ int main()
     fprintf(cenario, "\nAvg. Waiting Time: %.2f\n", somaWt / qtd_process); 
 	fprintf(cenario, "Avg. Turn Around Time: %.2f\n", somaTt / qtd_process); 
 	fprintf(cenario, "Avg. Service time: %.2f\n", somaBt / qtd_process);
+    fprintf(cenario, "Throughput: %.2f\n", t/qtd_process);
     fprintf(cenario, "Tempo de execucao do programa: %.2f\n", (double)time_Execution);
 
     return 0;
