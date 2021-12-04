@@ -16,7 +16,8 @@ typedef struct processo{
 	struct processo *prox;
 }Processo; 
 
-float somaWt = 0, somaTt = 0, somaBt = 0; 
+//variaveis para acumulação dos tempos
+float somaWt = 0, somaTt = 0, somaBt = 0, somaTh=0; 
 
 //Função para atribuir -1 em todas as posições de um vetor
 void resetarVetor(int *vet, int tam){
@@ -132,6 +133,8 @@ void extrairDoArquivo(Processo **filaP, char *linha_arq)
 			j++;
 		}
 	}
+
+	//inserir os dados extraidos na filaP
 	inserirNafilaP(filaP, id, arriv, prio, burst, bloq);
 } 
 
@@ -141,7 +144,6 @@ int main()
 	int i, j;
 	float t; 
 	Processo *filaP = NULL; //fila de processos prontos
-	Processo *bloqueados = NULL; //fila de processos bloqueados
 	FILE *cenario = fopen("./cenarios-entrada/" CENARIO, "r");
 
 	int qtd_process=0;
@@ -216,12 +218,13 @@ int main()
         //fprintf(cenario, "%d\t\t%d\t\t%d\n", proxP->rt, proxP->wt, proxP->prioridade); 
 
 		filaP = tail;
-	} 
+	}  
 	
 	time_Execution = clock() - time_Execution; //calculo do tempo de execucao do programa
     fprintf(cenario, "\nAvg. Waiting Time: %.2f\n", somaWt / qtd_process); 
 	fprintf(cenario, "Avg. Turn Around Time: %.2f\n", somaTt / qtd_process); 
 	fprintf(cenario, "Avg. Service time: %.2f\n", somaBt / qtd_process);
+	fprintf(cenario, "Throughput: %.2f\n", t/qtd_process);
     fprintf(cenario, "Tempo de execucao do programa: %.2f\n", (double)time_Execution);
 
 	return 0;
